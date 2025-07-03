@@ -1,11 +1,5 @@
 
-# Ignorer les dépendances Node.js
-node_modules/
-package-lock.json
 
-# Ignorer les fichiers du frontend (optionnel si tu veux les exclure)
-frontend/package.json
-frontend/package-lock.json
 
 # Ignorer l’environnement Python
 venv/
