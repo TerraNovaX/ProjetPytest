@@ -1,6 +1,7 @@
 import pytest
 from moto import mock_dynamodb
 import boto3
+import os
 from lambda_function import lambda_handler
 
 @pytest.fixture
@@ -16,7 +17,8 @@ def setup_dynamodb():
         table.put_item(Item={'user_id': '123', 'name': 'Alice'})
         yield
 
-def test_get_user(setup_dynamodb):
+def test_get_user(setup_dynamodb, monkeypatch):
+    monkeypatch.setenv("TABLE_NAME", "Users")
     event = {
         'httpMethod': 'GET',
         'queryStringParameters': {'user_id': '123'}
