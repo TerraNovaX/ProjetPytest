@@ -9,10 +9,14 @@ beforeEach(() => {
   );
 });
 
-test('envoie un utilisateur et affiche un message', async () => {
+test('envoie un nom et affiche un message', async () => {
   render(<UserForm />);
-  fireEvent.change(screen.getByPlaceholderText(/user_id/i), { target: { value: 'u1' } });
-  fireEvent.change(screen.getByPlaceholderText(/name/i), { target: { value: 'Bob' } });
+
+  // On ne remplit que le champ "name"
+  fireEvent.change(screen.getByPlaceholderText(/name/i), {
+    target: { value: 'Bob' }
+  });
+
   fireEvent.click(screen.getByText(/Créer/i));
 
   const message = await screen.findByText(/Utilisateur créé/i);
