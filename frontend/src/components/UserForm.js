@@ -19,21 +19,19 @@ export default function UserForm() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-
     try {
-      const res = await fetch(API_URL, {
+      const res = await fetch('https://sils518b8k.execute-api.eu-west-1.amazonaws.com/prod/user', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ name })
       });
 
+      if (!res.ok) throw new Error('Erreur API');
+
       const data = await res.json();
       setMessage(data.message || 'Utilisateur créé');
-      setName('');
-      fetchUsers(); // Recharger la liste après ajout
-    } catch (err) {
-      console.error('Erreur lors de la création', err);
-      setMessage("Erreur lors de la création de l'utilisateur");
+    } catch (error) {
+      setMessage('Erreur lors de la création');
     }
   };
 

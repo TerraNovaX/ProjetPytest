@@ -4,6 +4,7 @@ import UserForm from '../UserForm';
 beforeEach(() => {
   global.fetch = jest.fn(() =>
     Promise.resolve({
+      ok: true,
       json: () => Promise.resolve({ message: 'Utilisateur créé' })
     })
   );
