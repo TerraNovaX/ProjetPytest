@@ -7,7 +7,7 @@ export default function UserForm() {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    const res = await fetch('https://arn:aws:apigateway:eu-west-1::/apis/sils518b8k/routes/pxw2227', {
+    const res = await fetch('https://sils518b8k.execute-api.eu-west-1.amazonaws.com/prod/user', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ name })
