@@ -6,10 +6,17 @@ dynamodb = boto3.resource('dynamodb', region_name='eu-west-1')
 table = dynamodb.Table('user')
 
 def lambda_handler(event, context):
-    method = event.get('httpMethod')
+    # Compatible HTTP API
+    method = event.get("requestContext", {}).get("http", {}).get("method")
 
     if method == 'GET':
-        user_id = event['queryStringParameters']['user_id']
+        user_id = event.get('queryStringParameters', {}).get('user_id')
+        if not user_id:
+            return {
+                'statusCode': 400,
+                'body': json.dumps({'error': 'user_id manquant'})
+            }
+
         response = table.get_item(Key={'user_id': user_id})
         return {
             'statusCode': 200,
@@ -17,25 +24,34 @@ def lambda_handler(event, context):
         }
 
     elif method == 'POST':
-        body = json.loads(event['body'])
-        name = body.get('name')
+        try:
+            body = json.loads(event.get('body', '{}'))
+            name = body.get('name')
 
-        if not name:
-            return {
-                'statusCode': 400,
-                'body': json.dumps({'error': 'Le champ name est requis'})
+            if not name:
+                return {
+                    'statusCode': 400,
+                    'body': json.dumps({'error': 'Le champ name est requis'})
+                }
+
+            user_id = str(uuid.uuid4())
+            item = {
+                'user_id': user_id,
+                'name': name
             }
 
-        user_id = str(uuid.uuid4())
-        item = {
-            'user_id': user_id,
-            'name': name
-        }
+            table.put_item(Item=item)
+            return {
+                'statusCode': 201,
+                'body': json.dumps({'message': 'User created', 'user_id': user_id})
+            }
+        except Exception as e:
+            return {
+                'statusCode': 500,
+                'body': json.dumps({'error': f'Erreur serveur: {str(e)}'})
+            }
 
-        table.put_item(Item=item)
-        return {
-            'statusCode': 201,
-            'body': json.dumps({'message': 'User created', 'user_id': user_id})
-        }
-
-    return {'statusCode': 400, 'body': 'Unsupported method'}
+    return {
+        'statusCode': 405,
+        'body': json.dumps({'error': 'Méthode HTTP non supportée'})
+    }
