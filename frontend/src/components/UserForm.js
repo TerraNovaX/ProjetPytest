@@ -11,32 +11,48 @@ export default function UserForm() {
     try {
       const res = await fetch(API_URL);
       const data = await res.json();
-      setUsers(data);
+      if (Array.isArray(data)) {
+        setUsers(data);
+      } else {
+        setUsers([]);
+      }
     } catch (err) {
-      console.error('Erreur lors de la récupération des utilisateurs', err);
+      console.error(err);
+      setMessage("Erreur lors de la récupération des utilisateurs");
     }
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+
+    if (!name.trim()) {
+      setMessage("Le nom est requis");
+      return;
+    }
+
     try {
-      const res = await fetch('https://sils518b8k.execute-api.eu-west-1.amazonaws.com/prod/user', {
+      const res = await fetch(API_URL, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ name })
       });
 
-      if (!res.ok) throw new Error('Erreur API');
-
       const data = await res.json();
-      setMessage(data.message || 'Utilisateur créé');
-    } catch (error) {
-      setMessage('Erreur lors de la création');
+
+      if (res.ok) {
+        setMessage(data.message || 'Utilisateur créé');
+        setName('');
+        fetchUsers(); // Refresh users
+      } else {
+        setMessage(data.error || "Erreur lors de la création");
+      }
+    } catch (err) {
+      setMessage("Erreur réseau");
     }
   };
 
   useEffect(() => {
-    fetchUsers(); // Charger les utilisateurs dès le chargement du composant
+    fetchUsers();
   }, []);
 
   return (
@@ -52,10 +68,12 @@ export default function UserForm() {
 
       <p>{message}</p>
 
-      <h3>Utilisateurs :</h3>
+      <h3>Utilisateurs</h3>
       <ul>
         {users.map(user => (
-          <li key={user.user_id}>{user.name}</li>
+          <li key={user.user_id}>
+            {user.name}
+          </li>
         ))}
       </ul>
     </div>
