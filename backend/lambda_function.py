@@ -10,18 +10,22 @@ def lambda_handler(event, context):
     method = event.get("requestContext", {}).get("http", {}).get("method")
 
     if method == 'GET':
-        user_id = event.get('queryStringParameters', {}).get('user_id')
-        if not user_id:
+        params = event.get('queryStringParameters') or {}
+        user_id = params.get('user_id')
+        if user_id:
+            # Récupérer un seul utilisateur
+            response = table.get_item(Key={'user_id': user_id})
             return {
-                'statusCode': 400,
-                'body': json.dumps({'error': 'user_id manquant'})
+                'statusCode': 200,
+                'body': json.dumps(response.get('Item', {}))
             }
-
-        response = table.get_item(Key={'user_id': user_id})
-        return {
-            'statusCode': 200,
-            'body': json.dumps(response.get('Item', {}))
-        }
+        else:
+            # Récupérer tous les utilisateurs
+            response = table.scan()
+            return {
+                'statusCode': 200,
+                'body': json.dumps(response.get('Items', []))
+            }
 
     elif method == 'POST':
         try:
