@@ -1,5 +1,5 @@
 import { render, screen, fireEvent } from '@testing-library/react';
-import UserForm from '../userForm';
+import UserForm from '../UserForm';
 
 beforeEach(() => {
   global.fetch = jest.fn(() =>
